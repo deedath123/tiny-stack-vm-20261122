@@ -1,7 +1,5 @@
-// A tiny stack virtual machine for make.fun's tiny stack ISA (see the
-// kit's ISA.md): 32-bit wrapping arithmetic, a 256-value stack, calls,
-// 256 words of memory, input/output, and every trap with its own exit
-// code. Runs the whole set under /input, one answer per instance.
+// A tiny stack virtual machine for make.fun's tiny stack ISA (the kit's
+// ISA.md): wrapping 32-bit arithmetic, every trap with its own exit code.
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -24,8 +22,9 @@ function run(p, inp) {
     const imm = op === 1 ? 1 : op === 2 ? 4 : op >= 48 && op <= 51 ? 2 : 0;
     if (pc + imm >= n) return done(9);
     steps++;
-    if (sp < POPS.charCodeAt(op) - 48) return done(2);
-    if (sp - (POPS.charCodeAt(op) - 48) + (PUSH.charCodeAt(op) - 48) > 256) return done(3);
+    const pp = POPS.charCodeAt(op) - 48;
+    if (sp < pp) return done(2);
+    if (sp - pp + (PUSH.charCodeAt(op) - 48) > 256) return done(3);
     const nx = pc + 1 + imm;
     pc = nx;
     if (op >= 16 && op <= 34 && op !== 23 && op !== 27) {
